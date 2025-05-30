@@ -1,0 +1,40 @@
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./Home";
+import SecondPage from "./SecondPage";
+import ThirdPage from "./ThirdPage";
+import Workout from "./Workout";
+import Homedash from "./Homedash";
+import Caloricounter from "./Caloricounter";  // Updated import
+import TalkAi from "./TalkAi";  // Import TalkAi component
+import Dashboard from './pages/Dashboard';
+import WeightLossDiary from "./WeightLossDiary";
+import FitnessTrends from "./FitnessTrends";
+import Food from "./Food";
+import Support from "./Support";
+import About from "./About";
+import WeightLossPlan from "./WeightLossPlan";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/second" element={<SecondPage />} />
+        <Route path="/third" element={<ThirdPage />} />
+        <Route path="/workout" element={<Workout />} />
+        <Route path="/homedash" element={<Homedash />} />
+        <Route path="/caloricounter" element={<Caloricounter />} /> {/* Updated Route */}
+        <Route path="/talkai" element={<TalkAi />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/weightLossDiary" element={<WeightLossDiary />} />
+        <Route path="/fitnessTrends" element={<FitnessTrends />} />
+        <Route path="/food" element={<Food />} />
+        <Route path="/plan" element={<WeightLossPlan />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

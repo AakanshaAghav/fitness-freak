@@ -1,0 +1,101 @@
+/* General Chatbox Styling */
+.chatbox-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chat-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff7e00;
+  margin-bottom: 15px;
+}
+
+/* Chat Container */
+.chat-container {
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ffb26b;
+}
+
+/* Chat Bubble */
+.chat-bubble {
+  display: flex;
+  align-items: center;
+  max-width: 75%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* User Message Styling */
+.user-bubble {
+  background-color: #ffe5cc;
+  color: #333;
+  justify-content: flex-start;
+  margin-left: auto;
+}
+
+/* AI Message Styling */
+.ai-bubble {
+  background-color: #ffedd5;
+  color: #333;
+  justify-content: flex-start;
+  margin-right: auto;
+}
+
+/* Profile Icons */
+.user-logo,
+.ai-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 0 10px;
+}
+
+/* Input and Send Button */
+.input-container {
+  display: flex;
+  margin-top: 10px;
+}
+
+.input-field {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #817e7c;
+  background-color: #f7f3e9;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #ff7e00;
+  box-shadow: 0 0 5px rgba(255, 126, 0, 0.6);
+}
+
+.send-btn {
+  background-color: #ff7e00;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  border: none;
+  outline: none;
+}
+
+.send-btn:hover {
+  background-color: #ff6a00;
+  transform: scale(1.05);
+}

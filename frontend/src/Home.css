@@ -1,0 +1,236 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #1c1c2e;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    padding: 10px 20px;
+  }
+  
+  .menu a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+  }
+  
+  .signup-btn {
+    background-color: orange;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+  }
+  
+  .main-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin-top: 40px;
+  }
+  
+  .text-section {
+    width: 50%;
+  }
+  
+  .text-section h1 {
+    font-size: 36px;
+  }
+  
+  .text-section p {
+    font-size: 18px;
+    margin-top: 10px;
+  }
+  
+  .cta-btn {
+    background-color: orange;
+    padding: 15px 20px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    margin-top: 15px;
+  }
+  
+  .slider-wrapper {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .slider-container {
+    width: 250px;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .slider {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: 100%;
+  }
+  
+  .slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    width: 100%;
+    transition: transform 1s ease-in-out;
+  }
+  
+  .slide img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  .slide p {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .question-section {
+    margin-top: 50px;
+    text-align: center;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    width: 500px;
+    margin-left: 500px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Added shadow */
+    transition: box-shadow 0.3s ease-in-out; /* Smooth effect */
+  }
+  
+  .question-section:hover {
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15); /* Slightly deeper shadow on hover */
+  }
+  .question-section h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .question-section p {
+    font-size: 18px;
+    color: #555;
+  }
+  
+  .features-section{
+    justify-content:space-around;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .features-section h2,p{
+    margin-right: 100px;  
+  }
+  
+  .features-section img{
+    width: 200px;
+    height: 200px;
+  }
+  
+  .features-section1{
+    justify-content:space-around;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .features-section1 h2,p{
+    margin-right: 100px;  
+  }
+  
+  .features-section1 img{
+    width: 200px;
+    height: 200px;
+  }
+  .box1, .box2, .box3, .box4{
+    margin-top: 50px;
+    text-align: center;
+    padding: 30px;
+    background-color: #FF6733;
+    border-radius: 10px;
+    width: 500px;
+    display:flex;
+    flex-direction: row; 
+    /* margin-left: 500px;  */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Added shadow */
+    transition: box-shadow 0.3s ease-in-out; /* Smooth effect */
+  }
+  
+  .box1:hover, .box2:hover, .box3:hover, .box4:hover{
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15); /* Slightly deeper shadow on hover */
+  }
+  /* 1CCAD7 */
+  
+  .footer {
+    background-color: black;
+    color: white;
+    padding: 20px;
+    margin-top: 50px;
+  }
+  
+  .back-to-top {
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+  
+  .footer-section {
+    width: 23%;
+  }
+  
+  .footer-section h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .footer-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footer-section ul li {
+    margin: 5px 0;
+    cursor: pointer;
+  }
+  
+  .join-btn,
+  .help-btn {
+    background-color: white;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .app-links img {
+    width: 120px;
+    margin: 5px 0;
+  }
+  

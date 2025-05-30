@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>21-Day Weight Loss Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 min-h-screen text-gray-800 font-sans p-6">
+
+  <!-- Header -->
+  <header class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-blue-700 mb-4">🏖️ 21-Day Weight Loss Plan</h1>
+    <p class="italic text-lg text-gray-600">"Discipline is choosing between what you want now and what you want most."</p>
+    <p class="italic text-lg text-gray-600">"The body achieves what the mind believes."</p>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="planContainer" class="space-y-4 max-w-4xl mx-auto">
+    <!-- JS inserts each day here -->
+  </main>
+
+  <!-- Plan Data + JS -->
+  <script>// plan.js
+
+const weightLossPlans = {
+  'Day 1': `
+    🌅 Morning:
+    - Warm lemon water.
+    - Light stretching for 10 mins.
+    - Breakfast: Oats with chia seeds, almonds, and banana.
+
+    🍱 Lunch:
+    - 1 cup brown rice, 1 cup moong dal, salad with cucumber and carrots.
+
+    🥗 Evening:
+    - Green tea and 1 fruit (apple/orange).
+
+    🌙 Dinner:
+    - Grilled paneer with sautéed vegetables.
+    - Warm turmeric milk (optional).
+  `,
+  'Day 2': `
+    🌅 Morning:
+    - Cumin water on an empty stomach.
+    - 10 min brisk walk.
+    - Breakfast: Poha with peas and lemon, 1 boiled egg (optional).
+
+    🍱 Lunch:
+    - Multigrain roti with palak sabzi, salad.
+
+    🥗 Evening:
+    - Buttermilk and a handful of nuts.
+
+    🌙 Dinner:
+    - Vegetable soup and roasted chana.
+  `,
+  'Day 3': `
+    🌅 Morning:
+    - Apple cider vinegar in warm water.
+    - 15 mins of yoga.
+    - Breakfast: Vegetable upma with sprouts.
+
+    🍱 Lunch:
+    - Quinoa pulao with mixed vegetables.
+
+    🥗 Evening:
+    - Green tea and a small bowl of papaya.
+
+    🌙 Dinner:
+    - Moong dal cheela with mint chutney.
+  `,
+  'Day 4': `
+    🌅 Morning:
+    - Warm water with cinnamon.
+    - 10-minute jog or walk.
+    - Breakfast: 2 boiled eggs, 1 whole wheat toast, green tea.
+
+    🍱 Lunch:
+    - Bajra roti with baingan bharta, cucumber salad.
+
+    🥗 Evening:
+    - Coconut water and roasted seeds.
+
+    🌙 Dinner:
+    - Vegetable stew with 1 multigrain roti.
+  `,
+  'Day 5': `
+    🌅 Morning:
+    - Detox water (mint + lemon + cucumber).
+    - 15 mins of jump rope or brisk walk.
+    - Breakfast: Besan chilla with curd.
+
+    🍱 Lunch:
+    - 1 cup rice, rajma curry, and mixed salad.
+
+    🥗 Evening:
+    - Herbal tea and 2 dates.
+
+    🌙 Dinner:
+    - Paneer tikka with green chutney.
+  `,
+  'Day 6': `
+    🌅 Morning:
+    - Warm turmeric water.
+    - Sun salutation (Surya Namaskar).
+    - Breakfast: Smoothie (banana, spinach, almond milk).
+
+    🍱 Lunch:
+    - Chapati with bottle gourd curry, beetroot salad.
+
+    🥗 Evening:
+    - Lemon tea and a handful of peanuts.
+
+    🌙 Dinner:
+    - Khichdi with curd.
+  `,
+  'Day 7': `
+    🌅 Morning:
+    - Fennel seed water.
+    - 20 minutes walk.
+    - Breakfast: Idli with sambhar.
+
+    🍱 Lunch:
+    - Brown rice with spinach dal and salad.
+
+    🥗 Evening:
+    - Fruit salad with flax seeds.
+
+    🌙 Dinner:
+    - Mix veg soup with whole grain toast.
+  `,
+  'Day 8': `
+    🌅 Morning:
+    - Lemon and honey water.
+    - Yoga or cycling.
+    - Breakfast: Stuffed roti (methi or palak) with curd.
+
+    🍱 Lunch:
+    - Mixed vegetable curry, 2 rotis, salad.
+
+    🥗 Evening:
+    - Green tea and roasted fox nuts (makhana).
+
+    🌙 Dinner:
+    - Sautéed tofu with broccoli.
+  `,
+  'Day 9': `
+    🌅 Morning:
+    - Ginger water.
+    - Stretching + breathing exercises.
+    - Breakfast: Dhokla with coriander chutney.
+
+    🍱 Lunch:
+    - Dal tadka, jeera rice, onion salad.
+
+    🥗 Evening:
+    - Amla juice and walnuts.
+
+    🌙 Dinner:
+    - Stuffed capsicum and chapati.
+  `,
+  'Day 10': `
+    🌅 Morning:
+    - Cumin + ajwain water.
+    - Skipping or brisk walk.
+    - Breakfast: Fruit bowl with chia pudding.
+
+    🍱 Lunch:
+    - Roti with bhindi sabzi and salad.
+
+    🥗 Evening:
+    - Herbal tea and puffed rice.
+
+    🌙 Dinner:
+    - Veg oats khichdi.
+  `,
+  'Day 11': `
+    🌅 Morning:
+    - Warm lemon water.
+    - Light yoga.
+    - Breakfast: Boiled chana with chopped veggies.
+
+    🍱 Lunch:
+    - Tofu stir-fry with brown rice.
+
+    🥗 Evening:
+    - Buttermilk and apple.
+
+    🌙 Dinner:
+    - Cabbage soup with roasted tofu.
+  `,
+  'Day 12': `
+    🌅 Morning:
+    - Fenugreek seed water.
+    - Walk for 30 mins.
+    - Breakfast: Smoothie bowl with seeds.
+
+    🍱 Lunch:
+    - Multigrain roti with mixed dal and salad.
+
+    🥗 Evening:
+    - Green tea and fruit.
+
+    🌙 Dinner:
+    - Grilled vegetables and paneer.
+  `,
+  'Day 13': `
+    🌅 Morning:
+    - Ajwain + lemon water.
+    - Brisk walk.
+    - Breakfast: Upma with mixed veggies.
+
+    🍱 Lunch:
+    - Rice + sambar + carrot salad.
+
+    🥗 Evening:
+    - Amla juice and murmura.
+
+    🌙 Dinner:
+    - Moong soup and toast.
+  `,
+  'Day 14': `
+    🌅 Morning:
+    - Warm ginger water.
+    - Stretching and yoga.
+    - Breakfast: Masala oats.
+
+    🍱 Lunch:
+    - Bajra roti with tinda curry.
+
+    🥗 Evening:
+    - Coconut water and almonds.
+
+    🌙 Dinner:
+    - Zucchini stir-fry and 1 roti.
+  `,
+  'Day 15': `
+    🌅 Morning:
+    - Lemon water with honey.
+    - Jogging.
+    - Breakfast: Wheat flakes with milk.
+
+    🍱 Lunch:
+    - Rajma chawal and salad.
+
+    🥗 Evening:
+    - Herbal tea with makhana.
+
+    🌙 Dinner:
+    - Vegetable soup with toast.
+  `,
+  'Day 16': `
+    🌅 Morning:
+    - Detox water (mint + lemon).
+    - Jumping jacks.
+    - Breakfast: Mixed vegetable sandwich.
+
+    🍱 Lunch:
+    - Oats khichdi with salad.
+
+    🥗 Evening:
+    - Lemon tea and banana.
+
+    🌙 Dinner:
+    - Grilled mushroom and roti.
+  `,
+  'Day 17': `
+    🌅 Morning:
+    - Cinnamon water.
+    - Sun salutation.
+    - Breakfast: Idli with chutney.
+
+    🍱 Lunch:
+    - Chapati, moong dal and sabzi.
+
+    🥗 Evening:
+    - Green tea and handful of nuts.
+
+    🌙 Dinner:
+    - Tomato soup and stir-fried vegetables.
+  `,
+  'Day 18': `
+    🌅 Morning:
+    - Ginger tea.
+    - Jogging.
+    - Breakfast: Paneer sandwich.
+
+    🍱 Lunch:
+    - Rice with chole and salad.
+
+    🥗 Evening:
+    - Buttermilk and fruit.
+
+    🌙 Dinner:
+    - Sautéed vegetables and 1 roti.
+  `,
+  'Day 19': `
+    🌅 Morning:
+    - Warm water with lemon.
+    - Yoga stretches.
+    - Breakfast: Masala poha.
+
+    🍱 Lunch:
+    - Vegetable pulao with curd.
+
+    🥗 Evening:
+    - Green tea and chana.
+
+    🌙 Dinner:
+    - Moong dal soup and toast.
+  `,
+  'Day 20': `
+    🌅 Morning:
+    - Lemon honey water.
+    - Morning walk.
+    - Breakfast: Sprouts with fruit.
+
+    🍱 Lunch:
+    - Bajra roti, lauki curry and salad.
+
+    🥗 Evening:
+    - Herbal tea and peanuts.
+
+    🌙 Dinner:
+    - Grilled tofu and mixed vegetables.
+  `,
+  'Day 21': `
+    🌅 Morning:
+    - Detox drink.
+    - Meditation and walk.
+    - Breakfast: Smoothie with spinach, banana, almond milk.
+
+    🍱 Lunch:
+    - Roti, dal, sabzi and salad.
+
+    🥗 Evening:
+    - Fruit bowl with flaxseeds.
+
+    🌙 Dinner:
+    - Clear veg soup with roasted paneer.
+  `
+};
+
+function showPlan(day) {
+  const planDisplay = document.getElementById('planDisplay');
+  planDisplay.innerText = weightLossPlans[day] || 'Plan not found.';
+}
+</script>
+  <script>
+    const container = document.getElementById('planContainer');
+
+    const colors = [
+      "bg-orange-100", "bg-blue-100", "bg-yellow-100", "bg-teal-100", "bg-pink-100",
+      "bg-purple-100", "bg-green-100", "bg-red-100", "bg-amber-100", "bg-indigo-100",
+      "bg-cyan-100", "bg-lime-100", "bg-rose-100", "bg-sky-100", "bg-emerald-100",
+      "bg-fuchsia-100", "bg-violet-100", "bg-slate-100", "bg-zinc-100", "bg-stone-100",
+      "bg-white"
+    ];
+
+    const emojis = [
+      "🌞", "🌊", "🍉", "🏃‍♀️", "🥗", "🚴‍♂️", "🧘", "💧", "🌴", "🕊️",
+      "🧃", "🍋", "🍍", "🌅", "🧘‍♂️", "🕶️", "🍇", "🪷", "🌻", "🥥", "💪"
+    ];
+
+    for (let i = 1; i <= 21; i++) {
+      const day = `Day ${i}`;
+      const color = colors[(i - 1) % colors.length];
+      const emoji = emojis[(i - 1) % emojis.length];
+
+      // Outer container
+      const section = document.createElement('section');
+      section.className = `rounded-xl shadow-md overflow-hidden border ${color}`;
+
+      // Button for Day heading
+      const button = document.createElement('button');
+      button.className = "w-full flex justify-between items-center px-6 py-4 text-xl font-semibold text-gray-800 focus:outline-none";
+      button.innerHTML = `<span>${emoji} ${day}</span><span class="text-xl">▼</span>`;
+      button.setAttribute("aria-expanded", "false");
+
+      // Collapsible content
+      const content = document.createElement('div');
+      content.className = "px-6 py-4 hidden border-t text-gray-700 whitespace-pre-line bg-white";
+      content.innerText = weightLossPlans[day];
+
+      // Toggle logic
+      button.addEventListener("click", () => {
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", !expanded);
+        content.classList.toggle("hidden");
+      });
+
+      section.appendChild(button);
+      section.appendChild(content);
+      container.appendChild(section);
+    }
+  </script>
+
+</body>
+</html>
