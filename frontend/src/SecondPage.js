@@ -13,9 +13,9 @@ const SecondPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    axios.post('',{firstName,email,password,confirmPassword})
-    .then(result => console.log(result))
-    .catch(err=> console.log(err))
+    axios.post('', { firstName, email, password, confirmPassword })
+      .then(result => console.log(result))
+      .catch(err => console.log(err))
   }
 
   useEffect(() => {
@@ -32,30 +32,30 @@ const SecondPage = () => {
     };
   }, []);
 
- const handleNext = () => {
-  // if (!firstName || !email || !password || !confirmPassword) {
-  //   setError("Please fill in all fields.");
-  //   return;
-  // }
-  // if (password !== confirmPassword) {
-  //   setError("Passwords do not match.");
-  //   return;
-  // }
+  const handleNext = () => {
+    if (!firstName || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-  // setError("");
+    setError("");
 
-  // ✅ Save data to localStorage before navigating
-  // const basicInfo = {
-  //   firstName,
-  //   email,
-  //   password
-  // };
+    //✅ Save data to localStorage before navigating
+    const basicInfo = {
+      firstName,
+      email,
+      password
+    };
 
-  // localStorage.setItem("signupData", JSON.stringify(basicInfo));
+    localStorage.setItem("signupData", JSON.stringify(basicInfo));
 
-  // ✅ Navigate to second sign-up page
-  navigate("/third");
-};
+    // ✅ Navigate to second sign-up page
+    navigate("/third");
+  };
 
 
   return (

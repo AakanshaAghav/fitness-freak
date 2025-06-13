@@ -1,41 +1,30 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
-
-const User = require('./models/User');
-const authRoutes = require('./routes/auth');
+const bodyParser = require('body-parser');
+require('dotenv').config(); // Load environment variables
 
 const app = express();
 
-// Enable CORS for frontend
+// ✅ Connect to MongoDB
+require('./models/db.js'); // Ensure this connects using mongoose
+
+// ✅ Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json()); // Parses JSON request body
+app.use(bodyParser.json()); // Optional
 
-// ✅ Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch((err) => console.error('❌ MongoDB connection error:', err));
+// ✅ Routes
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/userRoutes');
+const fitnessRoutes = require('./routes/fitness'); // Contains /save-fitness-data and /generate-diet-plan
 
-// ✅ Mount OAuth Routes
-app.use('/', authRoutes);
-
-// ✅ User Registration Route
-app.post('/register', async (req, res) => {
-  try {
-    const newUser = new User(req.body);
-    await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'Something went wrong' });
-  }
-});
+app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
+app.use('/api/fitness', fitnessRoutes); // All fitness-related APIs
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;

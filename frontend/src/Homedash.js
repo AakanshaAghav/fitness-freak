@@ -5,28 +5,29 @@ import { useNavigate } from "react-router-dom";
 
 
 function HomeDash() {
+
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showFoodPopup, setShowFoodPopup] = useState(false);
-  const [showExercisePopup, setShowExercisePopup] = useState(false);
-  const [selectedFoods, setSelectedFoods] = useState([]);
-  const [selectedExercises, setSelectedExercises] = useState([]);
-  const [customFood, setCustomFood] = useState("");
-  const [customExercise, setCustomExercise] = useState("");
-  const [showBiometricPopup, setShowBiometricPopup] = useState(false);
-  const [biometricStatus, setBiometricStatus] = useState("");
-  const [showAccountPopup, setShowAccountPopup] = useState(false);
-
   const [steps, setSteps] = useState(null);
   const [heartRate, setHeartRate] = useState(null);
   const [calories, setCalories] = useState(null); // New state for calories
   const [weight, setWeight] = useState(null);
   const [spo2, setSpo2] = useState(null);
+  const [email, setEmail] = useState('');
 
+  const [sleepQuality, setSleepQuality] = useState('');
+  const [sugarStatus, setSugarStatus] = useState('');
+  const [bpStatus, setBpStatus] = useState('');
+  const [cholesterol, setCholesterol] = useState('');
+  const [activityLevel, setActivityLevel] = useState('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     let token = urlParams.get('token');
+
+    const userEmail = localStorage.getItem('email'); // Make sure this is set at login
+    //const userEmail = urlParams.get('email');
+    if (userEmail) setEmail(userEmail);
 
     if (token) {
       localStorage.setItem('fitness_token', token);
@@ -42,6 +43,8 @@ function HomeDash() {
       setSteps(0);
       setHeartRate(0);
       setCalories(0);
+      setWeight(0);
+      setSpo2(0);
     }
   }, []);
 
@@ -124,15 +127,6 @@ function HomeDash() {
     }
   };
 
-  const userProfile = {
-    name: "John Doe",
-    email: "johndoe@example.com",
-    membership: "Premium Member",
-  };
-
-  const foodOptions = ["Apple", "Banana", "Chicken Salad", "Oatmeal", "Rice", "Eggs", "Grilled Fish"];
-  const exerciseOptions = ["Running", "Cycling", "Push-ups", "Squats", "Jump Rope", "Deadlifts", "Yoga"];
-
   // Sidebar items with corresponding icons
   const menuItems = [
     { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
@@ -145,44 +139,35 @@ function HomeDash() {
     { name: "About", icon: <FaInfoCircle />, path: "/about" },
   ];
 
-  const handleFoodSelect = (food) => {
-    if (!selectedFoods.includes(food)) {
-      setSelectedFoods([...selectedFoods, food]);
-    }
-  };
+    const handleSaveToBackend = async () => {
+  if (!email) {
+    alert("User email is missing in the URL.");
+    return;
+  }
 
-  // Handle adding a custom food
-  const handleCustomFoodAdd = () => {
-    if (customFood.trim() !== "" && !selectedFoods.includes(customFood)) {
-      setSelectedFoods([...selectedFoods, customFood]);
-      setCustomFood(""); // Clear input after adding
-    }
-  };
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    await axios.post('http://localhost:5000/api/fitness/save-fitness-data', {
+      email,
+      date: today,
+      steps,
+      heartRate,
+      calories,
+      weight,
+      spo2,
+      sleepQuality,
+      sugarStatus,
+      bpStatus,
+      cholesterol,
+      activityLevel
+    });
 
-  // Handle exercise selection
-  const handleExerciseSelect = (exercise) => {
-    if (!selectedExercises.includes(exercise)) {
-      setSelectedExercises([...selectedExercises, exercise]);
-    }
-  };
-
-  // Handle custom exercise addition
-  const handleCustomExerciseAdd = () => {
-    if (customExercise.trim() !== "" && !selectedExercises.includes(customExercise)) {
-      setSelectedExercises([...selectedExercises, customExercise]);
-      setCustomExercise(""); // Clear input
-    }
-  };
-
-  // Function to mock biometric scanning
-  const handleBiometricScan = () => {
-    const success = Math.random() > 0.5; // Simulates success/failure (50% chance)
-    if (success) {
-      setBiometricStatus("✅ Authentication Successful!");
-    } else {
-      setBiometricStatus("❌ Authentication Failed. Try Again.");
-    }
-  };
+    alert("✅ Fitness data saved successfully!");
+  } catch (error) {
+    console.error("❌ Failed to save fitness data:", error);
+    alert("❌ Failed to save data. Try again.");
+  }
+};
 
   return (
     <div style={styles.app}>
@@ -218,19 +203,15 @@ function HomeDash() {
         {/* Header */}
         <div style={styles.header}>
           <h2>Your Dashboard</h2>
-          <div style={styles.account} onClick={() => setShowAccountPopup(true)}>Account ▼</div>
+          <div style={styles.account} onClick={() => navigate('/profile')}>Account ▼</div>
         </div>
 
         {/* Quick Add Section */}
         <div style={styles.quickAdd}>
-          <span style={styles.quickAddText}>Quick Add to Diary</span>
           <div style={styles.quickButtons}>
             <button style={styles.quickButton} onClick={() => navigate("/food")}>🍎 FOOD</button>
-            <button style={styles.quickButton} onClick={() => setShowExercisePopup(true)}>🏋️ EXERCISE</button>
-            <button style={styles.quickButton} onClick={() => setShowBiometricPopup(true)}>💜 BIOMETRIC</button>
-            <button style={styles.quickButton}>📄 NOTE</button>
+            <button style={styles.quickButton} onClick={() => navigate("/fitnessTrends")}>🏋️ Trends</button>
             <button style={styles.quickButton} onClick={() => navigate("/talkai")}>🤖 Talk To AI</button>
-            <button style={styles.quickButton} onClick={() => navigate("/caloricounter")}>🥗 AI Calorie Counter</button>
           </div>
         </div>
 
@@ -268,120 +249,115 @@ function HomeDash() {
         </div>
 
         <div style={styles.cards}>
-          {/* Weight Goal Overview Card */}
-          {/* <div style={styles.card}>
-            <h3>Weight Goal Overview</h3>
-            <p>Maintain Weight - <strong>40 kg</strong></p>
-            <button style={styles.logWeightButton}>LOG WEIGHT</button>
-          </div> */}
-
-          {/* Eat Smarter, Sleep Better Card */}
-          <div style={styles.cardBlue}>
-            <h3>Eat Smarter. Sleep Better.</h3>
-            <p>Discover how your nutrition is affecting your sleep by connecting a device.</p>
-            <button style={styles.getStartedButton}>GET STARTED</button>
+           {/* Sleep Quality */}
+          <div style={styles.card}>
+            <h3 style={{ marginTop: "-10px", fontSize: "18px", color: "#333" }}>Sleep Quality 😴</h3>
+            <select
+              value={sleepQuality}
+              onChange={(e) => setSleepQuality(e.target.value)}
+              style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', width: '150px' }}
+            >
+              <option value="">Select</option>
+              <option>Good</option>
+              <option>Average</option>
+              <option>Poor</option>
+            </select>
           </div>
+
+
+              
+            {/* Sugar Status */}
+          <div style={styles.card}>
+              <h3 style={{ marginTop: "-10px", fontSize: "18px", color: "#333" }}>Sugar Status 🍬</h3>
+              <select
+                value={sugarStatus}
+                onChange={(e) => setSugarStatus(e.target.value)}
+                style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', width: '150px' }}
+              >
+                <option value="">Select</option>
+                <option>Normal</option>
+                <option>Prediabetic</option>
+                <option>Diabetic</option>
+              </select>
+         </div>
+
+                
+        {/* Blood Pressure */}
+         <div style={styles.card}>
+            <h3 style={{ marginTop: "-10px", fontSize: "18px", color: "#333" }}>Blood Pressure 💓</h3>
+            <select
+              value={bpStatus}
+              onChange={(e) => setBpStatus(e.target.value)}
+              style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', width: '150px' }}
+            >
+             <option value="">Select</option>
+             <option>Normal</option>
+             <option>Prehypertension</option>
+             <option>Hypertension</option>
+            </select>
+         </div>
+
+        {/* Cholesterol */}
+         <div style={styles.card}>
+           <h3 style={{ marginTop: "-10px", fontSize: "18px", color: "#333" }}>Cholesterol 🧈</h3>
+           <select
+             value={cholesterol}
+             onChange={(e) => setCholesterol(e.target.value)}
+             style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', width: '150px' }}
+            >
+            <option value="">Select</option>
+            <option>Normal</option>
+            <option>Borderline High</option>
+            <option>High</option>
+           </select>
+         </div>
+
+              
+            {/* Activity Level */}
+         <div style={styles.card}>
+             <h3 style={{ marginTop: "-10px", fontSize: "18px", color: "#333" }}>Activity Level 🏃‍♂️</h3>
+             <select
+               value={activityLevel}
+               onChange={(e) => setActivityLevel(e.target.value)}
+               style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', width: '150px' }}
+             >
+               <option value="">Select</option>
+               <option>Sedentary</option>
+               <option>Lightly Active</option>
+               <option>Moderately Active</option>
+               <option>Very Active</option>
+             </select>
         </div>
-
-
-        {/* Display Selected Foods */}
-        {selectedFoods.length > 0 && (
-          <div style={styles.selectedContainer}>
-            <h4>Selected Foods:</h4>
-            <ul>
-              {selectedFoods.map((food, index) => (
-                <li key={index} style={styles.selectedItem}>{food}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Display Selected Exercises */}
-        {selectedExercises.length > 0 && (
-          <div style={styles.selectedContainer}>
-            <h4>Selected Exercises:</h4>
-            <ul>
-              {selectedExercises.map((exercise, index) => (
-                <li key={index} style={styles.selectedItem}>{exercise}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Food Selection Popup */}
-        {showFoodPopup && (
-          <div style={styles.popup}>
-            <div style={styles.popupContent}>
-              <h3>Select Your Food</h3>
-              <div style={styles.optionList}>
-                {foodOptions.map((food, index) => (
-                  <button key={index} style={styles.optionButton} onClick={() => handleFoodSelect(food)}>
-                    {food}
-                  </button>
-                ))}
-              </div>
-              <input
-                type="text"
-                value={customFood}
-                onChange={(e) => setCustomFood(e.target.value)}
-                placeholder="Enter custom food..."
-                style={styles.input}
-              />
-              <button style={styles.addButton} onClick={handleCustomFoodAdd}>Add</button>
-              <button style={styles.closeButton} onClick={() => setShowFoodPopup(false)}>Close</button>
-            </div>
-          </div>
-        )}
-
-        {/* Exercise Selection Popup */}
-        {showExercisePopup && (
-          <div style={styles.popup}>
-            <div style={styles.popupContent}>
-              <h3>Select Your Exercise</h3>
-              <div style={styles.optionList}>
-                {exerciseOptions.map((exercise, index) => (
-                  <button key={index} style={styles.optionButton} onClick={() => handleExerciseSelect(exercise)}>
-                    {exercise}
-                  </button>
-                ))}
-              </div>
-              <input
-                type="text"
-                value={customExercise}
-                onChange={(e) => setCustomExercise(e.target.value)}
-                placeholder="Enter custom exercise..."
-                style={styles.input}
-              />
-              <button style={styles.addButton} onClick={handleCustomExerciseAdd}>Add</button>
-              <button style={styles.closeButton} onClick={() => setShowExercisePopup(false)}>Close</button>
-            </div>
-          </div>
-        )}
-        {/* Biometric Popup */}
-        {showBiometricPopup && (
-          <div style={styles.popup}>
-            <div style={styles.popupContent}>
-              <h3>Scan Your Biometric</h3>
-              <p>Place your finger on the scanner or use face recognition.</p>
-              <button style={styles.scanButton} onClick={handleBiometricScan}>🔍 Scan Biometric</button>
-              {biometricStatus && <p>{biometricStatus}</p>}
-              <button style={styles.closeButton} onClick={() => setShowBiometricPopup(false)}>Close</button>
-            </div>
-          </div>
-        )}
-        {/* Account Popup */}
-        {showAccountPopup && (
-          <div style={styles.popup}>
-            <div style={styles.popupContent}>
-              <h3>User Profile</h3>
-              <p><strong>Name:</strong> {userProfile.name}</p>
-              <p><strong>Email:</strong> {userProfile.email}</p>
-              <p><strong>Membership:</strong> {userProfile.membership}</p>
-              <button style={styles.closeButton} onClick={() => setShowAccountPopup(false)}>Close</button>
-            </div>
-          </div>
-        )}
-
+       </div>
+       {/* Save Button */}
+        <button 
+            onClick={handleSaveToBackend} 
+            style={{
+                     padding: "10px 20px",
+                     backgroundColor: "orange",
+                     color: "Black",
+                     border: "none",
+                     borderRadius: "6px",
+                     marginTop: "20px",
+                     cursor: "pointer"
+                  }}>
+            Save Today's Data
+        </button>
+        <button
+           onClick={() => navigate(`/diet-plan/${email}`)}
+           style={{
+                    padding: "10px 20px",
+                    backgroundColor: "orange",
+                    color: "Black",
+                    border: "none",
+                    borderRadius: "6px",
+                    marginTop: "20px",
+                    marginLeft: "20px",
+                    cursor: "pointer"
+                 }}
+        >
+          Generate Diet Plan
+         </button>
       </div>
     </div>
   );
@@ -492,14 +468,6 @@ const styles = {
     boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
     flex: 1,
   },
-  fastButton: {
-    backgroundColor: "#046c63",
-    color: "white",
-    padding: "10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-  },
   logWeightButton: {
     backgroundColor: "#046c63",
     color: "white",
@@ -508,111 +476,6 @@ const styles = {
     border: "none",
     cursor: "pointer",
   },
-  getStartedButton: {
-    backgroundColor: "#02699c",
-    color: "white",
-    padding: "10px",
-    borderRadius: "5px",
-    border: "none",
-    cursor: "pointer",
-  },
-  /* Selected Items */
-  selectedContainer: {
-    marginTop: "20px",
-    padding: "15px",
-    backgroundColor: "white",
-    borderRadius: "10px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  },
-  selectedContainerTitle: {
-    marginBottom: "10px",
-  },
-  selectedItem: {
-    padding: "5px 0",
-    fontSize: "16px",
-  },
-  /* Popups */
-  popup: {
-    position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    backgroundColor: "white",
-    padding: "25px",
-    borderRadius: "10px",
-    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.2)",
-    width: "350px",
-    textAlign: "center",
-    zIndex: 1000,
-  },
-  popupContentTitle: {
-    marginBottom: "15px",
-  },
-  optionList: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "10px",
-    justifyContent: "center",
-  },
-  optionButton: {
-    padding: "8px 12px",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    backgroundColor: "#007bff",
-    color: "white",
-    fontSize: "14px",
-    transition: "background 0.3s",
-  },
-  optionButtonHover: {
-    backgroundColor: "#0056b3",
-  },
-  input: {
-    width: "80%",
-    padding: "8px",
-    marginTop: "10px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-  },
-  popupContent: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  scanButton: {
-    marginTop: "10px",
-    padding: "10px 15px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
-  scanButtonHover: {
-    backgroundColor: "#0056b3",
-  },
-  addButton: {
-    marginTop: "10px",
-    padding: "8px 15px",
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-  closeButton: {
-    marginTop: "10px",
-    padding: "8px 15px",
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
-
-
 };
 
 

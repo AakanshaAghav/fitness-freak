@@ -26,8 +26,8 @@ export default function Home() {
             <a href="#">Features</a>
             <a href="#">Learn</a>
             <a href="#">Log In</a>
-            <button className="signup-btn" onClick={() => navigate("/second")}>
-              Sign Up
+            <button className="signup-btn" onClick={() => navigate("/login")}>
+              Login
             </button>
           </div>
         </nav>
@@ -39,7 +39,7 @@ export default function Home() {
               From macros to micros, Fitness-Freak gives you personalized insight into your diet, exercise, and health
               data so you can make more informed decisions about your health.
             </p>
-            <button className="cta-btn" style={{width:"200px"}} onClick={() => navigate("/second")}>
+            <button className="cta-btn" style={{width:"200px"}} onClick={() => navigate("/signup")}>
               Sign Up - It's Free!
             </button>
           </div>

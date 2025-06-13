@@ -13,14 +13,20 @@ import Food from "./Food";
 import Support from "./Support";
 import About from "./About";
 import WeightLossPlan from "./WeightLossPlan";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import DietPlan from "./DietPlan";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/second" element={<SecondPage />} />
-        <Route path="/third" element={<ThirdPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/diet-plan/:email" element={<DietPlan />} />
         <Route path="/workout" element={<Workout />} />
         <Route path="/homedash" element={<Homedash />} />
         <Route path="/caloricounter" element={<Caloricounter />} /> {/* Updated Route */}
