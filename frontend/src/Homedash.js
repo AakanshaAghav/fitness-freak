@@ -211,7 +211,23 @@ function HomeDash() {
           <div style={styles.quickButtons}>
             <button style={styles.quickButton} onClick={() => navigate("/food")}>🍎 FOOD</button>
             <button style={styles.quickButton} onClick={() => navigate("/fitnessTrends")}>🏋️ Trends</button>
-            <button style={styles.quickButton} onClick={() => navigate("/talkai")}>🤖 Talk To AI</button>
+             <button
+      onClick={() => window.open("http://localhost:3001", "_blank")}
+      style={{
+        backgroundColor: "#FCF0E0",
+    color: "black",
+    width: "150px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    padding: "8px 15px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+      }}
+    >
+      🤖 Talk to Chatbot
+    </button>
+            <button style={styles.quickButton} onClick={() => navigate("/fitness-history")}>📊 Fitness History</button>
           </div>
         </div>
 

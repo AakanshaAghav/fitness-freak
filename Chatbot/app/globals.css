@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+body {
+  @apply font-sans text-foreground;
+  background-color: hsl(var(--background)); /* Using the custom property for background */
+  color: hsl(var(--foreground)); /* Using the custom property for text */
+}
+
+@layer base {
+  :root {
+    /* Light background theme */
+    --background: 30 100% 98%;            /* very light orange (almost white) */
+    --foreground: 30 90% 15%;             /* dark orange text */
+    --card: 30 100% 95%;                  /* light card background */
+    --card-foreground: 30 90% 15%;        /* card text same as foreground */
+    
+    /* Primary orange for buttons, highlights */
+    --primary: 30 100% 50%;               /* vivid orange */
+    --primary-foreground: 0 0% 100%;     /* white text on orange */
+
+    --secondary: 30 90% 85%;
+    --secondary-foreground: 30 100% 30%;
+
+    --muted: 30 70% 80%;
+    --muted-foreground: 30 90% 40%;
+
+    --accent: 30 90% 45%;                 /* rich orange accent */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 10 90% 55%;            /* bright red-orange destructive */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 30 90% 75%;
+    --input: 30 90% 85%;
+    --ring: 30 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    /* Manually apply background and text colors */
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Logo styling with warm orange glow */
+.logo {
+  @apply text-transparent font-extrabold text-5xl;
+  background: linear-gradient(45deg, hsl(30, 100%, 45%), hsl(30, 90%, 55%));
+  -webkit-background-clip: text;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px hsla(30, 100%, 45%, 0.6);
+  }
+  to {
+    text-shadow: 0 0 20px hsla(30, 90%, 55%, 1);
+  }
+}
+
+/* Textbox styling */
+input[type="text"], textarea {
+  @apply bg-primary text-white border border-gray-300 p-3 rounded-lg shadow-md transition-transform duration-300 ease-in-out;
+}
+
+input[type="text"]:focus, textarea:focus {
+  @apply bg-accent transform scale-105;
+}
+
+/* Button styling */
+button {
+  @apply bg-primary text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-accent hover:scale-105 transition-transform duration-300;
+}
+
+button:active {
+  @apply scale-95;
+}
+
+/* Restart button */
+.restart-button {
+  @apply bg-destructive text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-red-600 hover:scale-105 transition-transform duration-300;
+}
+
+/* Utility Classes */
+.container {
+  @apply max-w-5xl mx-auto px-6 py-8;
+}
+
+.section-title {
+  @apply text-4xl font-bold text-primary mb-8;
+}
+
+.text-muted {
+  @apply text-muted-foreground;
+}

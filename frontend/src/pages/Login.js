@@ -18,21 +18,21 @@ const LoginPage = () => {
     setError("");
 
     axios.post("http://localhost:5000/auth/login", { email, password })
-  .then((result) => {
-    console.log(result.data);
-    if (result.data.success) {
-      localStorage.setItem("token", result.data.jwtToken);
-      localStorage.setItem("email", email); // ✅ Save email for future use
-      alert("Login successful!");
-      navigate("/homedash"); // Navigate to dashboard or homepage
-    } else {
-      setError(result.data.message || "Login failed.");
-    }
-  })
-  .catch((err) => {
-    console.error(err);
-    setError("Invalid email or password.");
-  });
+      .then((result) => {
+        console.log(result.data);
+        if (result.data.success) {
+          localStorage.setItem("token", result.data.jwtToken);
+          localStorage.setItem("email", email); // ✅ Save email for future use
+          alert("Login successful!");
+          navigate("/homedash"); // Navigate to dashboard or homepage
+        } else {
+          setError(result.data.message || "Login failed.");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Invalid email or password.");
+      });
 
   };
 

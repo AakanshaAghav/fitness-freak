@@ -84,34 +84,34 @@ router.get('/generate-diet-plan/:email', async (req, res) => {
     const avgHeartRate = totalHeartRate / data.length;
     const weightChange = weights[weights.length - 1] - weights[0];
 
-    let dietPlan = [];
+    // Personalized advice pool
+    let relevantTips = [];
 
-    // Personalized advice
     if (avgSteps < 5000 || lastDay.activityLevel === "Sedentary") {
-      dietPlan.push("Increase physical activity. Start daily 30-minute walks.");
+      relevantTips.push("Increase physical activity. Start daily 30-minute walks.");
     }
 
     if (lastDay.sugarStatus === "Diabetic" || lastDay.sugarStatus === "Prediabetic") {
-      dietPlan.push("Eat low-GI foods: oats, quinoa, leafy greens. Avoid sugary drinks.");
+      relevantTips.push("Eat low-GI foods: oats, quinoa, leafy greens. Avoid sugary drinks.");
     }
 
     if (lastDay.bpStatus?.includes("Hypertension")) {
-      dietPlan.push("Reduce salt intake. Eat potassium-rich foods like bananas and spinach.");
+      relevantTips.push("Reduce salt intake. Eat potassium-rich foods like bananas and spinach.");
     }
 
-    if (lastDay.cholesterol === "High") {
-      dietPlan.push("Avoid fried foods. Include oats, nuts, and fatty fish in meals.");
+    if (lastDay.cholesterol === "High" || lastDay.cholesterol === "Very High") {
+      relevantTips.push("Avoid fried foods. Include oats, nuts, and fatty fish in meals.");
     }
 
     if (avgCalories > 1800 && weightChange > 0.3) {
-      dietPlan.push("Create a slight caloric deficit. Focus on high-fiber, low-calorie foods.");
+      relevantTips.push("Create a slight caloric deficit. Focus on high-fiber, low-calorie foods.");
     }
 
-    if (lastDay.sleepQuality === "Poor") {
-      dietPlan.push("Consume magnesium-rich foods. Avoid caffeine and late-night snacks.");
+    if (lastDay.sleepQuality === "Poor" || lastDay.sleepQuality === "Very Poor") {
+      relevantTips.push("Consume magnesium-rich foods. Avoid caffeine and late-night snacks.");
     }
 
-    // 🔁 Ensure at least 5 suggestions
+    // Filler health tips
     const fillerTips = [
       "Drink at least 2.5 liters of water daily.",
       "Include more fiber: apples, lentils, brown rice.",
@@ -120,13 +120,32 @@ router.get('/generate-diet-plan/:email', async (req, res) => {
       "Ensure 7-8 hours of quality sleep daily.",
       "Add healthy fats: nuts, olive oil, seeds.",
       "Practice mindful eating to avoid overeating.",
+      "Do 5 minutes of stretching in the morning.",
+      "Replace refined grains with whole grains.",
+      "Avoid trans fats. Check labels on packaged food.",
     ];
 
-    while (dietPlan.length < 5 && fillerTips.length > 0) {
-      const tip = fillerTips.shift();
+    // Helper: shuffle array
+    const shuffleArray = (arr) => arr.sort(() => 0.5 - Math.random());
+
+    // Shuffle both relevant and filler tips
+    relevantTips = shuffleArray(relevantTips);
+    const shuffledFiller = shuffleArray(fillerTips);
+
+    // Fill tips to ensure minimum of 8 unique suggestions
+    const dietPlan = [...relevantTips];
+
+    for (let tip of shuffledFiller) {
+      if (dietPlan.length >= 8) break;
       if (!dietPlan.includes(tip)) {
         dietPlan.push(tip);
       }
+    }
+
+    // If still less than 8, repeat random filler tips
+    while (dietPlan.length < 8) {
+      const randomTip = fillerTips[Math.floor(Math.random() * fillerTips.length)];
+      if (!dietPlan.includes(randomTip)) dietPlan.push(randomTip);
     }
 
     return res.status(200).json({ dietPlan });
@@ -136,5 +155,33 @@ router.get('/generate-diet-plan/:email', async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+// Get Fitness History for the Last 7 Days
+router.get('/get-fitness-history/:email', async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const today = new Date();
+    const fromDate = new Date(today.setDate(today.getDate() - 6))
+      .toISOString()
+      .split("T")[0];
+
+    const history = await FitnessData.find({
+      email,
+      date: { $gte: fromDate }
+    }).sort({ date: 1 }); // ascending for easier graph plotting
+
+    if (!history.length) {
+      return res.status(404).json({ message: "No data found." });
+    }
+
+    res.status(200).json({ history });
+
+  } catch (error) {
+    console.error("❌ Error fetching fitness history:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 module.exports = router;
