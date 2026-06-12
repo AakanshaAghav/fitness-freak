@@ -1,17 +1,13 @@
 const express = require('express');
 const axios = require('axios');
-const qs = require('querystring');  // For URL encoding
+const qs = require('querystring');
 const router = express.Router();
 const { signup, login } = require('../controllers/AuthControllers');
 const { signupValidation, loginValidation } = require('../middlewares/AuthValidation');
 
-// ✅ Make sure this matches the route path
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-
-// 👇 Updated redirect URI to include /auth prefix (since app.use('/auth', ...) is used)
 const REDIRECT_URI = 'http://localhost:5000/auth/oauth2callback';
-
 
 // 🌐 Route to start Google OAuth flow
 router.get('/google-auth', (req, res) => {
@@ -27,7 +23,7 @@ router.get('/google-auth', (req, res) => {
   res.redirect(oauthUrl);
 });
 
-// ✅ OAuth callback route (redirected from Google)
+// ✅ OAuth callback route
 router.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
 
@@ -36,22 +32,46 @@ router.get('/oauth2callback', async (req, res) => {
       code,
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
-      redirect_uri: REDIRECT_URI, // must match exactly with what's registered in Google Console
+      redirect_uri: REDIRECT_URI,
       grant_type: 'authorization_code'
     }), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
-    const { access_token } = response.data;
+    const { access_token, refresh_token, expires_in } = response.data;
     console.log('✅ Access Token:', access_token);
+    console.log('✅ Refresh Token:', refresh_token);
 
-    // Redirect to your frontend dashboard with token
-    res.redirect(`http://localhost:3000/dashboard?token=${access_token}`);
+    // TODO: Save refresh_token in DB associated with your user for future use
+
+    // Redirect to frontend with access token
+    res.redirect(`http://localhost:3000/homedash?token=${access_token}`);
   } catch (err) {
-    console.error('❌ OAuth Token Exchange Error:', err.response?.data || err.message);
-    res.status(500).send('OAuth Failed');
+    const errData = err.response?.data || err.message;
+    console.error('❌ OAuth Token Exchange Error:', JSON.stringify(errData, null, 2));
+    res.status(500).send(`OAuth Failed: ${JSON.stringify(errData)}`);
+  }
+});
+
+// 🔄 Route to refresh access token using stored refresh token
+router.post('/refresh-token', async (req, res) => {
+  const { refreshToken } = req.body; // Get refresh token from frontend or DB
+
+  try {
+    const response = await axios.post('https://oauth2.googleapis.com/token', qs.stringify({
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token'
+    }), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    const { access_token, expires_in } = response.data;
+    res.json({ access_token, expires_in });
+  } catch (err) {
+    console.error('❌ Refresh Token Error:', err.response?.data || err.message);
+    res.status(500).json({ message: 'Failed to refresh access token' });
   }
 });
 

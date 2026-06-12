@@ -12,7 +12,7 @@ const fitnessDataSchema = new mongoose.Schema({
   // Newly added fields for diet plan logic
   sleepQuality: {
     type: String,
-    enum: ['Good', 'Average', 'Poor']
+    enum: ['Good', 'Average', 'Poor', 'Very Poor']
   },
   sugarStatus: {
     type: String,

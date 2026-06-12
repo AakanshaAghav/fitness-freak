@@ -1,77 +1,42 @@
 const express = require('express');
 const router = express.Router();
 const FitnessData = require('../models/FitnessData');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 // Save or Update Fitness Data (Upsert)
 router.post('/save-fitness-data', async (req, res) => {
-  const {
-    email,
-    date,
-    steps,
-    heartRate,
-    calories,
-    weight,
-    spo2,
-    sleepQuality,
-    sugarStatus,
-    bpStatus,
-    cholesterol,
-    activityLevel
-  } = req.body;
-
+  const { email, date, steps, heartRate, calories, weight, spo2, sleepQuality, sugarStatus, bpStatus, cholesterol, activityLevel } = req.body;
   try {
-    const result = await FitnessData.updateOne(
+    await FitnessData.updateOne(
       { email, date },
-      {
-        $set: {
-          steps,
-          heartRate,
-          calories,
-          weight,
-          spo2,
-          sleepQuality,
-          sugarStatus,
-          bpStatus,
-          cholesterol,
-          activityLevel
-        }
-      },
+      { $set: { steps, heartRate, calories, weight, spo2, sleepQuality, sugarStatus, bpStatus, cholesterol, activityLevel } },
       { upsert: true }
     );
-
-    console.log("✅ Upsert result:", result);
     res.status(200).json({ message: "Fitness data saved or updated successfully!" });
-
   } catch (error) {
-    console.error("❌ Error saving fitness data:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("❌ Error saving fitness data:", error.message, error.errors || '');
+    res.status(500).json({ message: "Internal server error", detail: error.message });
   }
 });
 
-// Generate Personalized Diet Plan Based on Last 7 Days
-// Generate Personalized Diet Plan Based on Last 7 Days
+// Generate AI-Powered Personalized Diet Plan
 router.get('/generate-diet-plan/:email', async (req, res) => {
   const { email } = req.params;
-
   try {
     const today = new Date();
-    const fromDate = new Date(today.setDate(today.getDate() - 6))
-      .toISOString()
-      .split("T")[0];
+    const localDate = new Date(today.getTime() + (5.5 * 60 * 60 * 1000)); // IST offset
+    const fromDate = new Date(localDate.setDate(localDate.getDate() - 6)).toISOString().split("T")[0];
 
-    const data = await FitnessData.find({
-      email,
-      date: { $gte: fromDate }
-    }).sort({ date: -1 });
+    const data = await FitnessData.find({ email, date: { $gte: fromDate } }).sort({ date: -1 });
 
     if (!data || data.length === 0) {
       return res.status(404).json({ message: "No fitness data found for the last 7 days." });
     }
 
-    // Analyze data
-    let totalSteps = 0, totalCalories = 0, totalHeartRate = 0;
-    let weights = [], lastDay = data[0];
-
+    let totalSteps = 0, totalCalories = 0, totalHeartRate = 0, weights = [];
     data.forEach(day => {
       totalSteps += day.steps || 0;
       totalCalories += day.calories || 0;
@@ -79,109 +44,70 @@ router.get('/generate-diet-plan/:email', async (req, res) => {
       weights.push(day.weight || 0);
     });
 
-    const avgSteps = totalSteps / data.length;
-    const avgCalories = totalCalories / data.length;
-    const avgHeartRate = totalHeartRate / data.length;
-    const weightChange = weights[weights.length - 1] - weights[0];
+    const avgSteps = (totalSteps / data.length).toFixed(0);
+    const avgCalories = (totalCalories / data.length).toFixed(0);
+    const avgHeartRate = (totalHeartRate / data.length).toFixed(1);
+    const weightChange = (weights[0] - weights[weights.length - 1]).toFixed(1);
+    const latest = data[0];
 
-    // Personalized advice pool
-    let relevantTips = [];
+    const prompt = `
+You are a certified nutritionist and fitness coach. Based on the following real health data from the past 7 days, generate a highly personalized diet plan.
 
-    if (avgSteps < 5000 || lastDay.activityLevel === "Sedentary") {
-      relevantTips.push("Increase physical activity. Start daily 30-minute walks.");
-    }
+User Health Summary:
+- Average daily steps: ${avgSteps}
+- Average daily calories burned: ${avgCalories} kcal
+- Average heart rate: ${avgHeartRate} bpm
+- Weight change over 7 days: ${weightChange} kg (positive = loss, negative = gain)
+- Latest SpO2: ${latest.spo2 || 'N/A'} %
+- Latest sleep quality: ${latest.sleepQuality || 'N/A'}
+- Sugar status: ${latest.sugarStatus || 'N/A'}
+- Blood pressure: ${latest.bpStatus || 'N/A'}
+- Cholesterol: ${latest.cholesterol || 'N/A'}
+- Activity level: ${latest.activityLevel || 'N/A'}
 
-    if (lastDay.sugarStatus === "Diabetic" || lastDay.sugarStatus === "Prediabetic") {
-      relevantTips.push("Eat low-GI foods: oats, quinoa, leafy greens. Avoid sugary drinks.");
-    }
+Instructions:
+- Generate exactly 10 specific, actionable diet and nutrition recommendations
+- Each tip must directly reference the user's actual data values
+- Include specific foods, meal timings, portion sizes, and nutrients where relevant
+- Address any health concerns (high BP, sugar, cholesterol, low SpO2, poor sleep) with targeted food advice
+- Keep each tip to 1-2 sentences
+- Return ONLY a valid JSON array of 10 strings, no markdown, no extra text
+- Format: ["Tip 1.", "Tip 2.", ...]
+`;
 
-    if (lastDay.bpStatus?.includes("Hypertension")) {
-      relevantTips.push("Reduce salt intake. Eat potassium-rich foods like bananas and spinach.");
-    }
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
 
-    if (lastDay.cholesterol === "High" || lastDay.cholesterol === "Very High") {
-      relevantTips.push("Avoid fried foods. Include oats, nuts, and fatty fish in meals.");
-    }
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("Invalid AI response format");
 
-    if (avgCalories > 1800 && weightChange > 0.3) {
-      relevantTips.push("Create a slight caloric deficit. Focus on high-fiber, low-calorie foods.");
-    }
-
-    if (lastDay.sleepQuality === "Poor" || lastDay.sleepQuality === "Very Poor") {
-      relevantTips.push("Consume magnesium-rich foods. Avoid caffeine and late-night snacks.");
-    }
-
-    // Filler health tips
-    const fillerTips = [
-      "Drink at least 2.5 liters of water daily.",
-      "Include more fiber: apples, lentils, brown rice.",
-      "Avoid late-night meals. Eat 2-3 hours before sleep.",
-      "Limit processed foods and sugary snacks.",
-      "Ensure 7-8 hours of quality sleep daily.",
-      "Add healthy fats: nuts, olive oil, seeds.",
-      "Practice mindful eating to avoid overeating.",
-      "Do 5 minutes of stretching in the morning.",
-      "Replace refined grains with whole grains.",
-      "Avoid trans fats. Check labels on packaged food.",
-    ];
-
-    // Helper: shuffle array
-    const shuffleArray = (arr) => arr.sort(() => 0.5 - Math.random());
-
-    // Shuffle both relevant and filler tips
-    relevantTips = shuffleArray(relevantTips);
-    const shuffledFiller = shuffleArray(fillerTips);
-
-    // Fill tips to ensure minimum of 8 unique suggestions
-    const dietPlan = [...relevantTips];
-
-    for (let tip of shuffledFiller) {
-      if (dietPlan.length >= 8) break;
-      if (!dietPlan.includes(tip)) {
-        dietPlan.push(tip);
-      }
-    }
-
-    // If still less than 8, repeat random filler tips
-    while (dietPlan.length < 8) {
-      const randomTip = fillerTips[Math.floor(Math.random() * fillerTips.length)];
-      if (!dietPlan.includes(randomTip)) dietPlan.push(randomTip);
-    }
-
+    const dietPlan = JSON.parse(jsonMatch[0]);
     return res.status(200).json({ dietPlan });
 
   } catch (error) {
     console.error("❌ Error generating diet plan:", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Failed to generate diet plan. Please try again." });
   }
 });
 
 // Get Fitness History for the Last 7 Days
 router.get('/get-fitness-history/:email', async (req, res) => {
   const { email } = req.params;
-
   try {
     const today = new Date();
-    const fromDate = new Date(today.setDate(today.getDate() - 6))
-      .toISOString()
-      .split("T")[0];
+    const localDate = new Date(today.getTime() + (5.5 * 60 * 60 * 1000));
+    const fromDate = new Date(localDate.setDate(localDate.getDate() - 6)).toISOString().split("T")[0];
 
-    const history = await FitnessData.find({
-      email,
-      date: { $gte: fromDate }
-    }).sort({ date: 1 }); // ascending for easier graph plotting
+    const history = await FitnessData.find({ email, date: { $gte: fromDate } }).sort({ date: 1 });
 
     if (!history.length) {
       return res.status(404).json({ message: "No data found." });
     }
-
     res.status(200).json({ history });
-
   } catch (error) {
     console.error("❌ Error fetching fitness history:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 module.exports = router;

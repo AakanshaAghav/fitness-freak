@@ -10,7 +10,7 @@ import { data } from "./data"; // Your health tips or food data should be here
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const dataString = JSON.stringify(data);
 
@@ -50,7 +50,8 @@ Bot answer:
 
     return responseText;
   } catch (error: unknown) {
-    console.error("Error in AI:", error);
-    return "Sorry, something went wrong while processing your request. Please try again later.";
+    const errMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error in AI:", errMsg);
+    return `DEBUG: ${errMsg}`;
   }
 };

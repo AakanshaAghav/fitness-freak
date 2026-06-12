@@ -1,188 +1,126 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend
-} from 'chart.js';
+import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
 
+const chartConfigs = [
+  { key: 'steps', label: 'Steps', color: '#3b82f6', bg: '#eff6ff' },
+  { key: 'calories', label: 'Calories (kcal)', color: '#10b981', bg: '#ecfdf5' },
+  { key: 'heartRate', label: 'Heart Rate (bpm)', color: '#ef4444', bg: '#fee2e2' },
+  { key: 'weight', label: 'Weight (kg)', color: '#8b5cf6', bg: '#ede9fe' },
+];
+
 const FitnessHistory = ({ email }) => {
+  const navigate = useNavigate();
+  const userEmail = email || localStorage.getItem('email');
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
-
-  const userEmail = email || localStorage.getItem("email");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!userEmail) {
-      setFetchError("No email found. Please log in.");
-      setLoading(false);
-      return;
-    }
-
-    const fetchHistory = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/fitness/get-fitness-history/${userEmail}`);
-        if (Array.isArray(res.data)) {
-          setHistory(res.data);
-        } else if (Array.isArray(res.data.history)) {
-          setHistory(res.data.history);
-        } else {
-          setFetchError("No fitness history found.");
-        }
-      } catch (err) {
-        setFetchError("Failed to fetch fitness history.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHistory();
+    if (!userEmail) { setError('No email found. Please log in.'); setLoading(false); return; }
+    axios.get(`http://localhost:5000/api/fitness/get-fitness-history/${userEmail}`)
+      .then(res => setHistory(Array.isArray(res.data) ? res.data : res.data.history || []))
+      .catch(() => setError('Failed to fetch fitness history.'))
+      .finally(() => setLoading(false));
   }, [userEmail]);
 
-  if (loading) return <p>Loading data...</p>;
-  if (fetchError) return <p style={{ color: "red" }}>{fetchError}</p>;
-  if (!history.length) return <p>No data found.</p>;
+  if (loading) return <div style={s.center}><div style={s.spinner} />Loading history...</div>;
+  if (error) return <div style={s.center}><p style={{ color: '#e53935' }}>{error}</p></div>;
+  if (!history.length) return <div style={s.center}><p>No fitness data found for the last 7 days.</p></div>;
 
-  const labels = history.map(item => item.date);
-  const steps = history.map(item => item.steps);
-  const calories = history.map(item => item.calories);
-  const heartRate = history.map(item => item.heartRate);
-  const weight = history.map(item => item.weight);
-
-  // 🆕 Map categorical to numeric
-  const mapSugar = { normal: 1, prediabetic: 2, diabetic: 3 };
-  const mapBP = { normal: 1, prehypertension: 2, hypertension: 3 };
-  const mapCholesterol = { normal: 1, 'borderline high': 2, high: 3 };
-  const mapActivity = { sedentary: 1, 'lightly active': 2, 'moderately active': 3, 'very active': 4 };
-
-  const sugar = history.map(item => mapSugar[item.sugarStatus.toLowerCase()] || 0);
-  const bp = history.map(item => mapBP[item.bpStatus.toLowerCase()] || 0);
-  const cholesterol = history.map(item => mapCholesterol[item.cholesterol.toLowerCase()] || 0);
-  const activity = history.map(item => mapActivity[item.activityLevel.toLowerCase()] || 0);
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' },
-      title: { display: false }
-    },
-    scales: {
-      y: {
-        ticks: {
-          callback: function (value, index, values) {
-            return value; // You can customize this to show category labels
-          }
-        }
-      }
-    }
-  };
-
-  const makeLineChart = (label, data, color) => ({
-    labels,
-    datasets: [
-      {
-        label,
-        data,
-        borderColor: color,
-        backgroundColor: color + '33',
-        fill: true,
-        tension: 0.3,
-      },
-    ],
-  });
+  const labels = history.map(d => d.date);
+  const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px' }}>
-      <h2 style={{ fontSize: '28px', textAlign: 'center', marginBottom: '30px', color: '#333' }}>
-        📊 Weekly Fitness Summary
-      </h2>
-
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '20px',
-        marginBottom: '40px'
-      }}>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#eff6ff', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Steps", steps, "#3b82f6")} options={chartOptions} />
-        </div>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#ecfdf5', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Calories", calories, "#10b981")} options={chartOptions} />
-        </div>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#fee2e2', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Heart Rate", heartRate, "#ef4444")} options={chartOptions} />
-        </div>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#ede9fe', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Weight (kg)", weight, "#8b5cf6")} options={chartOptions} />
-        </div>
-
-        {/* 🆕 Categorical Charts */}
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#fef9c3', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Sugar Level", sugar, "#facc15")} options={chartOptions} />
-        </div>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#fce7f3', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("BP Status", bp, "#db2777")} options={chartOptions} />
-        </div>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#e0f2fe', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Cholesterol", cholesterol, "#0ea5e9")} options={chartOptions} />
-        </div>
-        <div style={{ height: '260px', padding: '10px', backgroundColor: '#f0fdf4', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <Line data={makeLineChart("Activity Level", activity, "#22c55e")} options={chartOptions} />
-        </div>
+    <div style={s.page}>
+      <div style={s.navbar}>
+        <div style={s.brand}>🏋️ Fitness Freak</div>
+        <button style={s.backBtn} onClick={() => navigate('/homedash')}>← Dashboard</button>
       </div>
 
-      <h3 style={{ textAlign: 'center', fontSize: '24px', color: '#555', marginBottom: '20px' }}>
-        📅 Day-wise Details
-      </h3>
+      <div style={s.content}>
+        <div style={s.header}>
+          <h1 style={s.title}>📊 Weekly Fitness History</h1>
+          <p style={s.sub}>Your last 7 days at a glance</p>
+        </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '20px',
-        justifyItems: 'center'
-      }}>
-        {history.map((entry, idx) => {
-          const prev = history[idx - 1];
-          return (
-            <div
-              key={entry.date}
-              style={{
-                backgroundColor: '#fff',
-                border: '1px solid #ddd',
-                borderRadius: '12px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-                padding: '20px',
-                width: '100%',
-                maxWidth: '350px'
-              }}
-            >
-              <h4 style={{ fontWeight: 'bold', fontSize: '18px', color: '#4f46e5', marginBottom: '10px' }}>{entry.date}</h4>
-              <ul style={{ fontSize: '14px', color: '#333', listStyle: 'none', padding: 0 }}>
-                <li>🚶‍♀️ <strong>Steps:</strong> {entry.steps} {prev ? `(${entry.steps - prev.steps >= 0 ? '+' : ''}${entry.steps - prev.steps})` : ''}</li>
-                <li>🔥 <strong>Calories:</strong> {entry.calories} {prev ? `(Prev: ${prev.calories})` : ''}</li>
-                <li>❤️ <strong>Heart Rate:</strong> {entry.heartRate} bpm</li>
-                <li>⚖️ <strong>Weight:</strong> {entry.weight} kg</li>
-                <li>🛌 <strong>Sleep:</strong> {entry.sleepQuality}</li>
-                <li>🩸 <strong>Sugar:</strong> {entry.sugarStatus}</li>
-                <li>💉 <strong>BP:</strong> {entry.bpStatus}</li>
-                <li>🧪 <strong>Cholesterol:</strong> {entry.cholesterol}</li>
-                <li>🏃‍♂️ <strong>Activity:</strong> {entry.activityLevel}</li>
-              </ul>
+        {/* Charts */}
+        <div style={s.chartGrid}>
+          {chartConfigs.map(({ key, label, color, bg }) => (
+            <div key={key} style={{ ...s.chartCard, background: bg }}>
+              <div style={s.chartTitle}>{label}</div>
+              <div style={{ height: '200px' }}>
+                <Line options={chartOptions} data={{
+                  labels,
+                  datasets: [{ label, data: history.map(d => d[key]), borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.4, pointBackgroundColor: color }]
+                }} />
+              </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
+
+        {/* Day cards */}
+        <h2 style={s.sectionTitle}>Day-by-Day Breakdown</h2>
+        <div style={s.dayGrid}>
+          {history.map((entry, idx) => {
+            const prev = history[idx - 1];
+            const stepDiff = prev ? entry.steps - prev.steps : null;
+            return (
+              <div key={entry.date} style={s.dayCard}>
+                <div style={s.dayDate}>{entry.date}</div>
+                <div style={s.dayStats}>
+                  {[
+                    { icon: '🚶', label: 'Steps', val: `${entry.steps}${stepDiff !== null ? ` (${stepDiff >= 0 ? '+' : ''}${stepDiff})` : ''}` },
+                    { icon: '🔥', label: 'Calories', val: `${entry.calories} kcal` },
+                    { icon: '❤️', label: 'Heart Rate', val: `${entry.heartRate} bpm` },
+                    { icon: '⚖️', label: 'Weight', val: `${entry.weight} kg` },
+                    { icon: '😴', label: 'Sleep', val: entry.sleepQuality },
+                    { icon: '🍬', label: 'Sugar', val: entry.sugarStatus },
+                    { icon: '💓', label: 'BP', val: entry.bpStatus },
+                    { icon: '🧈', label: 'Cholesterol', val: entry.cholesterol },
+                    { icon: '🏃', label: 'Activity', val: entry.activityLevel },
+                  ].map(({ icon, label, val }) => (
+                    <div key={label} style={s.dayRow}>
+                      <span style={s.dayRowLabel}>{icon} {label}</span>
+                      <span style={s.dayRowVal}>{val || '—'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
+};
+
+const s = {
+  page: { minHeight: '100vh', background: '#f8f9fb', fontFamily: "'Segoe UI', sans-serif" },
+  navbar: { background: '#fff', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(0,0,0,0.07)', position: 'sticky', top: 0, zIndex: 100 },
+  brand: { fontSize: '20px', fontWeight: '800', color: '#ff6b00' },
+  backBtn: { background: 'transparent', border: '1.5px solid #e0e0e0', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '13px', color: '#555' },
+  content: { maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' },
+  header: { textAlign: 'center', marginBottom: '40px' },
+  title: { fontSize: '32px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 8px' },
+  sub: { fontSize: '15px', color: '#888' },
+  chartGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px', marginBottom: '48px' },
+  chartCard: { borderRadius: '16px', padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
+  chartTitle: { fontSize: '13px', fontWeight: '700', color: '#555', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' },
+  sectionTitle: { fontSize: '20px', fontWeight: '700', color: '#1a1a1a', marginBottom: '20px' },
+  dayGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' },
+  dayCard: { background: '#fff', borderRadius: '16px', padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
+  dayDate: { fontSize: '15px', fontWeight: '700', color: '#ff6b00', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid #f0f0f0' },
+  dayStats: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  dayRow: { display: 'flex', justifyContent: 'space-between', fontSize: '13px' },
+  dayRowLabel: { color: '#666' },
+  dayRowVal: { fontWeight: '600', color: '#1a1a1a' },
+  center: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px', fontFamily: "'Segoe UI', sans-serif", color: '#888' },
+  spinner: { width: '32px', height: '32px', border: '3px solid #f0f0f0', borderTop: '3px solid #ff6b00', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
 };
 
 export default FitnessHistory;

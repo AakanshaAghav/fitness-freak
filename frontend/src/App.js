@@ -16,6 +16,9 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import DietPlan from "./DietPlan";
 import FitnessHistory from "./components/FitnessHistory"; // ✅ New import
+import ProductsPage from "./pages/ProductsPage";
+import FeaturesPage from "./pages/FeaturesPage";
+import LearnPage from "./pages/LearnPage";
 
 function App() {
   const email = localStorage.getItem("email"); // ✅ Assuming you store it on login
@@ -39,6 +42,9 @@ function App() {
         <Route path="/plan" element={<WeightLossPlan />} />
         <Route path="/support" element={<Support />} />
         <Route path="/about" element={<About />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/learn" element={<LearnPage />} />
 
         {/* ✅ New Route for Fitness History */}
         <Route path="/fitness-history" element={<FitnessHistory email={email} />} />

@@ -7,136 +7,73 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
+    if (!email || !password) { setError("Please fill in all fields."); return; }
     setError("");
-
+    setLoading(true);
     axios.post("http://localhost:5000/auth/login", { email, password })
       .then((result) => {
-        console.log(result.data);
         if (result.data.success) {
           localStorage.setItem("token", result.data.jwtToken);
-          localStorage.setItem("email", email); // ✅ Save email for future use
-          alert("Login successful!");
-          navigate("/homedash"); // Navigate to dashboard or homepage
+          localStorage.setItem("email", email);
+          navigate("/homedash");
         } else {
           setError(result.data.message || "Login failed.");
         }
       })
-      .catch((err) => {
-        console.error(err);
-        setError("Invalid email or password.");
-      });
-
-  };
-
-  const styles = {
-    body: {
-      margin: 0,
-      fontFamily: '"Segoe UI", sans-serif',
-      backgroundColor: "#f2f2f2",
-      minHeight: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    form: {
-      backgroundColor: "#ffffff",
-      padding: "40px",
-      borderRadius: "10px",
-      width: "100%",
-      maxWidth: "400px",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    },
-    heading: {
-      marginBottom: "20px",
-      textAlign: "left",
-      fontSize: "24px",
-    },
-    label: {
-      display: "block",
-      marginBottom: "6px",
-      fontWeight: "bold",
-    },
-    input: {
-      width: "100%",
-      padding: "12px",
-      marginBottom: "20px",
-      borderRadius: "6px",
-      border: "1px solid #ccc",
-      fontSize: "14px",
-      boxSizing: "border-box",
-    },
-    button: {
-      width: "100%",
-      backgroundColor: "#orange",
-      color: "white",
-      padding: "12px",
-      fontSize: "16px",
-      border: "none",
-      borderRadius: "6px",
-      cursor: "pointer",
-      transition: "background-color 0.2s ease",
-    },
-    error: {
-      color: "red",
-      fontSize: "13px",
-      marginBottom: "10px",
-    },
-    signup: {
-      textAlign: "center",
-      marginTop: "20px",
-      fontSize: "14px",
-    },
-    linkText: {
-      color: "#007bff",
-      cursor: "pointer",
-      textDecoration: "underline",
-    },
+      .catch(() => setError("Invalid email or password."))
+      .finally(() => setLoading(false));
   };
 
   return (
-    <div style={styles.body}>
-      <form style={styles.form} onSubmit={handleLogin}>
-        <h2 style={styles.heading}>Welcome Back! Login to your account</h2>
+    <div style={s.page}>
+      <div style={s.card}>
+        <div style={s.brand}>🏋️ Fitness Freak</div>
+        <h2 style={s.heading}>Welcome back</h2>
+        <p style={s.sub}>Sign in to continue your fitness journey</p>
 
-        <label style={styles.label}>Email</label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-        />
+        <form onSubmit={handleLogin}>
+          <div style={s.field}>
+            <label style={s.label}>Email</label>
+            <input style={s.input} type="email" placeholder="you@example.com"
+              value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div style={s.field}>
+            <label style={s.label}>Password</label>
+            <input style={s.input} type="password" placeholder="••••••••"
+              value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          {error && <p style={s.error}>{error}</p>}
+          <button type="submit" style={s.btn} disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
 
-        <label style={styles.label}>Password</label>
-        <input
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-        />
-
-        {error && <div style={styles.error}>{error}</div>}
-
-        <button type="submit" style={styles.button}>Login</button>
-
-        <p style={styles.signup}>
+        <p style={s.footer}>
           Don't have an account?{" "}
-          <span style={styles.linkText} onClick={() => navigate("/signup")}>
-            Create one
-          </span>
+          <span style={s.link} onClick={() => navigate("/signup")}>Create one</span>
         </p>
-      </form>
+      </div>
     </div>
   );
+};
+
+const s = {
+  page: { minHeight: "100vh", background: "linear-gradient(135deg, #ff6b00 0%, #ff9a3c 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" },
+  card: { background: "#fff", borderRadius: "20px", padding: "48px 40px", width: "100%", maxWidth: "420px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" },
+  brand: { fontSize: "22px", fontWeight: "800", color: "#ff6b00", marginBottom: "28px", textAlign: "center" },
+  heading: { fontSize: "26px", fontWeight: "700", color: "#1a1a1a", margin: "0 0 6px" },
+  sub: { color: "#888", fontSize: "14px", marginBottom: "28px" },
+  field: { marginBottom: "18px" },
+  label: { display: "block", fontSize: "13px", fontWeight: "600", color: "#444", marginBottom: "6px" },
+  input: { width: "100%", padding: "12px 14px", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "14px", outline: "none", boxSizing: "border-box", transition: "border 0.2s" },
+  error: { color: "#e53935", fontSize: "13px", marginBottom: "12px", background: "#fff5f5", padding: "8px 12px", borderRadius: "8px" },
+  btn: { width: "100%", padding: "13px", background: "linear-gradient(135deg, #ff6b00, #ff9a3c)", color: "#fff", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer", marginTop: "4px" },
+  footer: { textAlign: "center", marginTop: "24px", fontSize: "14px", color: "#666" },
+  link: { color: "#ff6b00", cursor: "pointer", fontWeight: "600" },
 };
 
 export default LoginPage;

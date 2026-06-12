@@ -1,136 +1,143 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaCamera } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
+const fields = [
+  { label: 'First Name', name: 'firstName', type: 'text' },
+  { label: 'Phone Number', name: 'phone', type: 'text' },
+  { label: 'Email', name: 'email', type: 'email' },
+  { label: 'Password', name: 'password', type: 'password' },
+  { label: 'Age', name: 'age', type: 'number' },
+  { label: 'Height (cm)', name: 'height', type: 'number' },
+  { label: 'Weight (kg)', name: 'weight', type: 'number' },
+  { label: 'City', name: 'city', type: 'text' },
+  { label: 'Country', name: 'country', type: 'text' },
+];
 
 const UserProfile = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    phone: '',
-    email: '',
-    password: '',
-    city: '',
-    country: '',
-    age: '',
-    gender: '',
-    height: '',
-    weight: '',
-    sugarStatus: ''
-  });
-
-  const loggedInEmail = localStorage.getItem('email'); // Make sure this is set at login
+  const navigate = useNavigate();
+  const loggedInEmail = localStorage.getItem('email');
+  const [formData, setFormData] = useState({ firstName:'',phone:'',email:'',password:'',city:'',country:'',age:'',gender:'',height:'',weight:'' });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     if (loggedInEmail) {
       axios.get(`http://localhost:5000/user/profile?email=${loggedInEmail}`)
-        .then(res => {
-          setFormData(res.data); // sets full user object
-        })
-        .catch(err => console.error('Error loading profile:', err));
+        .then(res => setFormData(res.data))
+        .catch(err => console.error(err));
     }
   }, [loggedInEmail]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleUpdate = async () => {
+    setSaving(true);
     try {
       const res = await axios.put('http://localhost:5000/user/update-profile', formData);
-      alert('Profile updated successfully!');
-      setFormData(res.data.user); // updated user returned from backend
-    } catch (err) {
-      alert('Update failed!');
-      console.error(err);
+      setFormData(res.data.user);
+      setMsg('✅ Profile updated!');
+    } catch {
+      setMsg('❌ Update failed.');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setMsg(''), 3000);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#E8F0FE', padding: '40px', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', gap: '30px', maxWidth: '1300px', width: '100%' }}>
+    <div style={s.page}>
+      {/* Navbar */}
+      <div style={s.navbar}>
+        <div style={s.brand}>🏋️ Fitness Freak</div>
+        <button style={s.backBtn} onClick={() => navigate('/homedash')}>← Back to Dashboard</button>
+      </div>
+
+      <div style={s.content}>
         {/* Sidebar */}
-        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '10px', width: '300px', textAlign: 'center' }}>
-          <div style={{ position: 'relative', width: '100px', margin: 'auto' }}>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/3/33/Tim_Cook_2023.jpg" alt="Profile" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: '#1E90FF', padding: '6px', borderRadius: '50%', color: 'white', fontSize: '12px', cursor: 'pointer' }}>
-              <FaCamera />
-            </div>
+        <div style={s.sidebar}>
+          <div style={s.avatarWrap}>
+            <div style={s.avatar}>{formData.firstName?.[0]?.toUpperCase() || '?'}</div>
           </div>
-          <h2 style={{ marginTop: '10px', fontSize: '18px' }}>{formData.firstName}</h2>
-          <p style={{ color: 'gray', fontSize: '14px' }}>Fitness Enthusiast</p>
-          <div style={{ marginTop: '20px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Workouts Completed</span><span style={{ fontWeight: 'bold', color: 'green' }}>45</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}><span>Calories Burned</span><span style={{ fontWeight: 'bold', color: 'orange' }}>12,500</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}><span>Weekly Goal</span><span style={{ fontWeight: 'bold' }}>5/7</span></div>
+          <div style={s.sidebarName}>{formData.firstName || 'User'}</div>
+          <div style={s.sidebarEmail}>{formData.email}</div>
+          <div style={s.sidebarBadge}>🏅 Fitness Enthusiast</div>
+
+          <div style={s.statsBox}>
+            {[
+              { label: 'Workouts', val: '45', color: '#16a34a' },
+              { label: 'Calories Burned', val: '12,500', color: '#ff6b00' },
+              { label: 'Weekly Goal', val: '5/7', color: '#7c3aed' },
+            ].map(({ label, val, color }) => (
+              <div key={label} style={s.statRow}>
+                <span style={s.statLabel}>{label}</span>
+                <span style={{ ...s.statVal, color }}>{val}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Main Content */}
-        <div style={{ flex: 1, backgroundColor: '#fff', padding: '30px', borderRadius: '10px' }}>
-          <div style={{ display: 'flex', gap: '30px', fontWeight: 'bold', fontSize: '14px', borderBottom: '1px solid #ddd', paddingBottom: '10px', marginBottom: '20px' }}>
-            <div style={{ color: '#1E90FF', borderBottom: '2px solid #1E90FF', paddingBottom: '5px' }}>Account Settings</div>
-          </div>
+        {/* Form */}
+        <div style={s.formCard}>
+          <h2 style={s.formTitle}>Account Settings</h2>
+          <p style={s.formSub}>Update your personal information</p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-            {[
-              { label: 'Name', name: 'firstName' },
-              { label: 'Phone Number', name: 'phone' },
-              { label: 'Email', name: 'email', type: 'email' },
-              { label: 'Password', name: 'password', type: 'password' },
-              { label: 'Age', name: 'age', type: 'number' },
-              { label: 'Height (cm)', name: 'height', type: 'number' },
-              { label: 'Weight (kg)', name: 'weight', type: 'number' }
-            ].map(({ label, name, type = 'text' }) => (
-              <div key={name} style={{ width: 'calc(50% - 10px)', display: 'flex', flexDirection: 'column' }}>
-                <label>{label}</label>
-                <input
-                  type={type}
-                  name={name}
-                  value={formData[name] || ''}
-                  onChange={handleChange}
-                  style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-                />
+          <div style={s.fieldGrid}>
+            {fields.map(({ label, name, type }) => (
+              <div key={name} style={s.fieldWrap}>
+                <label style={s.label}>{label}</label>
+                <input type={type} name={name} value={formData[name] || ''} onChange={handleChange} style={s.input} />
               </div>
             ))}
-
-            <div style={{ width: 'calc(50% - 10px)', display: 'flex', flexDirection: 'column' }}>
-              <label>Gender</label>
-              <select name="gender" value={formData.gender} onChange={handleChange} style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}>
+            <div style={s.fieldWrap}>
+              <label style={s.label}>Gender</label>
+              <select name="gender" value={formData.gender || ''} onChange={handleChange} style={s.input}>
                 <option value="">Select</option>
                 <option>Male</option>
                 <option>Female</option>
                 <option>Other</option>
               </select>
             </div>
-
-            {/* <div style={{ width: 'calc(50% - 10px)', display: 'flex', flexDirection: 'column' }}>
-              <label>Sugar Status</label>
-              <select name="sugarStatus" value={formData.sugarStatus} onChange={handleChange} style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}>
-                <option value="">Select</option>
-                <option>Normal</option>
-                <option>Prediabetic</option>
-                <option>Diabetic</option>
-              </select>
-            </div> */}
-
-            <div style={{ width: 'calc(50% - 10px)', display: 'flex', flexDirection: 'column' }}>
-              <label>City</label>
-              <input name="city" value={formData.city} onChange={handleChange} style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
-            </div>
-
-            <div style={{ width: 'calc(50% - 10px)', display: 'flex', flexDirection: 'column' }}>
-              <label>Country</label>
-              <input name="country" value={formData.country} onChange={handleChange} style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
-            </div>
           </div>
 
-          <button onClick={handleUpdate} style={{ marginTop: '20px', backgroundColor: '#1E90FF', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '6px' }}>
-            Update
-          </button>
+          <div style={s.actions}>
+            <button onClick={handleUpdate} style={s.saveBtn} disabled={saving}>
+              {saving ? 'Saving...' : '💾 Save Changes'}
+            </button>
+            {msg && <span style={s.msg}>{msg}</span>}
+          </div>
         </div>
       </div>
     </div>
   );
+};
+
+const s = {
+  page: { minHeight: '100vh', background: '#f8f9fb', fontFamily: "'Segoe UI', sans-serif" },
+  navbar: { background: '#fff', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 12px rgba(0,0,0,0.07)', position: 'sticky', top: 0, zIndex: 100 },
+  brand: { fontSize: '20px', fontWeight: '800', color: '#ff6b00' },
+  backBtn: { background: 'transparent', border: '1.5px solid #e0e0e0', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '13px', color: '#555' },
+  content: { maxWidth: '1100px', margin: '32px auto', padding: '0 24px', display: 'flex', gap: '24px', flexWrap: 'wrap' },
+  sidebar: { width: '260px', background: '#fff', borderRadius: '16px', padding: '28px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', textAlign: 'center', flexShrink: 0 },
+  avatarWrap: { display: 'flex', justifyContent: 'center', marginBottom: '14px' },
+  avatar: { width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff6b00, #ff9a3c)', color: '#fff', fontSize: '32px', fontWeight: '800', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  sidebarName: { fontSize: '18px', fontWeight: '700', color: '#1a1a1a' },
+  sidebarEmail: { fontSize: '13px', color: '#888', marginTop: '4px', marginBottom: '10px' },
+  sidebarBadge: { display: 'inline-block', background: '#fff7ed', color: '#ff6b00', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', marginBottom: '20px' },
+  statsBox: { background: '#f8f9fb', borderRadius: '12px', padding: '16px', textAlign: 'left' },
+  statRow: { display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' },
+  statLabel: { color: '#666' },
+  statVal: { fontWeight: '700' },
+  formCard: { flex: 1, minWidth: '300px', background: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
+  formTitle: { fontSize: '20px', fontWeight: '700', color: '#1a1a1a', margin: '0 0 4px' },
+  formSub: { color: '#888', fontSize: '14px', marginBottom: '24px' },
+  fieldGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '18px' },
+  fieldWrap: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  label: { fontSize: '13px', fontWeight: '600', color: '#555' },
+  input: { padding: '11px 13px', borderRadius: '10px', border: '1.5px solid #e0e0e0', fontSize: '14px', outline: 'none', background: '#fafafa' },
+  actions: { display: 'flex', alignItems: 'center', gap: '14px', marginTop: '24px' },
+  saveBtn: { padding: '12px 28px', background: 'linear-gradient(135deg, #ff6b00, #ff9a3c)', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '14px', cursor: 'pointer' },
+  msg: { fontSize: '14px', fontWeight: '600', color: '#16a34a' },
 };
 
 export default UserProfile;
